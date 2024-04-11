@@ -2,11 +2,14 @@ package main
 
 import (
 	"github.com/a-h/templ"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/slinky55/go-ws-chat/models"
 	"github.com/slinky55/go-ws-chat/views"
 	"golang.org/x/net/websocket"
 	"sync"
+	"time"
 )
 
 type PubSub struct {
@@ -38,13 +41,34 @@ func main() {
 
 	e := echo.New()
 
-	log := []models.Message{
-		{Text: "Test!", Author: "Bob"},
-		{Text: "Another test!", Author: "Jane"},
-		{Text: "This is the 3rd test!", Author: "Joe"},
+	var ps PubSub
+	var log []models.Message
+
+	db, err := sqlx.Open("sqlite3", "./log.db")
+	if err != nil {
+		println(err.Error())
+		return
 	}
 
-	var ps PubSub
+	rows, err := db.Queryx("SELECT * FROM log")
+	if err != nil {
+		println("Failed to load message log")
+		return
+	}
+
+	for rows.Next() {
+		var text string
+		var author string
+		var timestamp string
+
+		err = rows.Scan(&author, &text, &timestamp)
+		if err != nil {
+			println(err.Error())
+			continue
+		}
+
+		log = append(log, models.Message{Text: author, Author: text, Timestamp: timestamp})
+	}
 
 	e.GET("/", func(c echo.Context) error {
 		return Render(c, 200, views.Index(log))
@@ -80,6 +104,15 @@ func main() {
 			c.Logger().Error(err.Error())
 			return err
 		}
+
+		chat.Timestamp = time.Now().Format(time.RFC3339)
+
+		_, err = db.Exec("INSERT INTO log VALUES (?, ?, ?)", chat.Text, chat.Author, chat.Timestamp)
+		if err != nil {
+			c.Logger().Error(err.Error())
+			return err
+		}
+
 		log = append(log, chat)
 
 		ps.Publish(chat)
@@ -87,7 +120,7 @@ func main() {
 		return c.HTML(200, `<input type="text" name="msg" id="msg" required />`)
 	})
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":80"))
 }
 
 func Render(ctx echo.Context, statusCode int, t templ.Component) error {
