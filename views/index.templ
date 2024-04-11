@@ -2,25 +2,26 @@ package views
 
 import ("github.com/slinky55/go-ws-chat/models")
 
-templ Index(contacts []models.Message) {
+templ Index(log []models.Message) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
 			<title>WS Chat</title>
 			<script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" crossorigin="anonymous"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/ws.js"></script>
 		</head>
 		<body>
-		    <h1>Contacts</h1>
-		    @ContactsDisplay(contacts)
+		    <h1>Chat Log</h1>
+		    @ChatLog(log)
 		    <hr />
-		    <h3>New Contact</h3>
-			@AddContactForm()
+		    <h3>Send Message</h3>
+			@SendMessageForm()
 		</body>
 	</html>
 }
 
 templ SendMessageForm() {
-	<form hx-post="/chat">
+	<form hx-post="/chat" hx-target="#msg" hx-swap="outerHTML">
 		<label>
 			Message
 			<input type="text" name="msg" id="msg" required />
@@ -33,9 +34,9 @@ templ SendMessageForm() {
 	</form>
 }
 
-templ ContactsDisplay(messages []models.Message) {
-	<div id="msgLog">
-	    for _, m := range contacts {
+templ ChatLog(messages []models.Message) {
+	<div id="msgLog" hx-ext="ws" ws-connect="/subscribe">
+	    for _, m := range messages {
             @MessageView(m)
         }
 	</div>
