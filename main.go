@@ -50,13 +50,13 @@ func main() {
 		return
 	}
 
+	db.MustExec(`CREATE TABLE IF NOT EXISTS log (text TEXT NOT NULL, author VARCHAR(15) DEFAULT NULL, timestamp TEXT NOT NULL)`)
+
 	rows, err := db.Queryx("SELECT * FROM log")
 	if err != nil {
 		println("Failed to load message log")
 		return
 	}
-
-	db.MustExec(`CREATE TABLE IF NOT EXISTS log (text TEXT NOT NULL, author VARCHAR(15) DEFAULT NULL, timestamp TEXT NOT NULL)`)
 
 	for rows.Next() {
 		var text string
