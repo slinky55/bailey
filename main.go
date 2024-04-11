@@ -5,8 +5,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/slinky55/go-ws-chat/models"
-	"github.com/slinky55/go-ws-chat/views"
+	"github.com/slinky55/bailey/models"
+	"github.com/slinky55/bailey/views"
 	"golang.org/x/net/websocket"
 	"sync"
 	"time"
@@ -122,7 +122,7 @@ func main() {
 		return c.HTML(200, `<input type="text" name="msg" id="msg" required />`)
 	})
 
-	e.Logger.Fatal(e.Start(":80"))
+	e.Logger.Fatal(e.Start(":42069"))
 }
 
 func Render(ctx echo.Context, statusCode int, t templ.Component) error {

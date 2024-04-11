@@ -1,4 +1,4 @@
-module github.com/slinky55/go-ws-chat
+module github.com/slinky55/bailey
 
 go 1.22.0
 

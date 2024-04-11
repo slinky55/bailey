@@ -11,7 +11,7 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/slinky55/go-ws-chat/models"
+	"github.com/slinky55/bailey/models"
 )
 
 func Index(log []models.Message) templ.Component {
