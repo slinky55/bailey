@@ -4,9 +4,11 @@ import (
 	"github.com/a-h/templ"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/slinky55/go-ws-chat/models"
 	"github.com/slinky55/go-ws-chat/views"
+	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/net/websocket"
 	"sync"
 	"time"
@@ -40,6 +42,9 @@ func main() {
 	println("starting bailey...")
 
 	e := echo.New()
+	e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
+	e.Use(middleware.Recover())
+	e.Use(middleware.Logger())
 
 	var ps PubSub
 	var log []models.Message
@@ -122,7 +127,7 @@ func main() {
 		return c.HTML(200, `<input type="text" name="msg" id="msg" required />`)
 	})
 
-	e.Logger.Fatal(e.Start(":80"))
+	e.Logger.Fatal(e.StartAutoTLS(":443"))
 }
 
 func Render(ctx echo.Context, statusCode int, t templ.Component) error {
