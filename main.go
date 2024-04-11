@@ -56,6 +56,8 @@ func main() {
 		return
 	}
 
+	db.MustExec(`CREATE TABLE IF NOT EXISTS log (text TEXT NOT NULL, author VARCHAR(15) DEFAULT NULL, timestamp TEXT NOT NULL)`)
+
 	for rows.Next() {
 		var text string
 		var author string
